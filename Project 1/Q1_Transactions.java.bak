@@ -1,0 +1,23 @@
+public class Transactions
+{
+	public static void main(String[] args)
+	{
+		
+                Dataset data= new DefaultDataset();
+                for (int i=0;i<10;i++) {
+                     Instance tmpInstance = InstanceTools.randomInstance(25);
+                     data.add(temInstance);
+                     }
+		        System.out.println(data);
+
+
+                int TransID = 1:5000000;
+                int CustID
+			    float TransTotal=Math.random()*990+10;
+                int TransNumItems = rand.nextInt(10);
+                int CountryCOde=rand.nextInt(10);
+
+                sb.append(all
+
+	}
+}
