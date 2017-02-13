@@ -1,4 +1,4 @@
-package Q3_1;
+package org.apache.hadoop.Q3_1;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -38,8 +38,10 @@ public class Q3_1 {
   
 
   public static void main(String[] args) throws Exception {
-	JobConf job = new JobConf(Q3_1.class);
- 	job.setJobName("Q3_1");
+    Configuration conf = new Configuration();
+
+    Job job = new Job(conf, "Q3_1");
+    job.setJarByClass(Q3_1.class);
     job.setMapperClass(TokenizerMapper.class);
 
     job.setOutputKeyClass(Text.class);
