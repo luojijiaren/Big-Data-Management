@@ -1,30 +1,65 @@
-public class Customers
-{
-	
-     public String randomWord() {
-		 int length = rand.nextInt(10) + 11;
-		 String word = "";
-		 for ((int i=0;i<length;i++) {
-			 word +=(char) randomChar();
-		 }
+import  java.io.*;
+import  org.apache.poi.xssf.usermodel.XSSFSheet;
+import  org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import  org.apache.poi.xssf.usermodel.XSSFRow;
+import  org.apache.poi.xssf.usermodel.XSSFCell;
+import java.util.Random;
+
+public class Q1_Customers{
+
+    public String randomWord() {
+		 Random randlen=new Random();
+		 long length = randlen.nextInt(10) + 11;
+		 char[] chars = "abcdefghijklmnopqrstuvwlyz".toCharArray();
+		 StringBuilder sb=new StringBuilder();
+		 for (long i=0;i<length;i++) {
+			 char c = chars[randlen.nextInt(chars.length)];
+			 sb.append(c);
+		     }
+		 String word = sb.toString();
 		 return word;
 		 }
+		 
 
-     public static void main(String[] args){
-		
-                Dataset data= new DefaultDataset();
-                for (int i=0;i<10;i++) {
-                     Instance tmpInstance = InstanceTools.randomInstance(25);
-                     data.add(temInstance);
-                     }
-	           	System.out.println(data);
 
-                int ID = 1:50000;
-                Char UserName = randomWord();
-                int Age = rand.nextInt(60)+10;
-                int CountryCOde=rand.nextInt(10);
-                float Salary=Math.random()*9900+100;
-                sb.append(all
+    public static void main(String[]args) {
+        try {
+            String filename = "C:/Users/fzhan/Documents/GitHub/Big-Data-Management/Project 1/Customers.xls" ;
+            XSSFWorkbook workbook = new XSSFWorkbook();
+			Random rand=new Random();
+			
+            XSSFSheet sheet = workbook.createSheet("FirstSheet");  
 
-	}
+            XSSFRow rowhead = sheet.createRow((int)0);
+            rowhead.createCell(0).setCellValue("ID");
+            rowhead.createCell(1).setCellValue("Name");
+            rowhead.createCell(2).setCellValue("Age");
+            rowhead.createCell(3).setCellValue("CountryCode");
+			rowhead.createCell(4).setCellValue("Salary");
+			
+			Q1_Customers test = new Q1_Customers();
+
+            for (long i=1;i<=50000;i++){
+			    XSSFRow row = sheet.createRow((int)i);
+                row.createCell(0).setCellValue(i);
+			    String r1= test.randomWord();
+                row.createCell(1).setCellValue(r1);
+				long r2= rand.nextInt(60)+10;
+                row.createCell(2).setCellValue(r2);
+			    long r3= rand.nextInt(9)+1;
+                row.createCell(3).setCellValue(r3);
+				float r4=rand.nextFloat()*9900+100;
+                row.createCell(4).setCellValue(r4);
+                }
+
+
+            FileOutputStream fileOut = new FileOutputStream(filename);
+            workbook.write(fileOut);
+            fileOut.close();
+            System.out.println("Your excel file has been generated!");
+
+        } catch ( Exception ex ) {
+            System.out.println(ex);
+        }
+    }
 }
