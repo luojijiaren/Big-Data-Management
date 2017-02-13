@@ -1,27 +1,22 @@
-package answer;
+package Q3_4;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.lang.Math;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
-
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -30,15 +25,14 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 
-
-
-public class Q3 extends Configured implements Tool{
+public class Q3_4 extends Configured implements Tool{
 	public static class Map extends Mapper<LongWritable, Text, IntWritable, Text>{
-		 
-		private HashMap<String,String> cusInfo = new HashMap<String,String>();
-        private IntWritable outPutKey = new IntWritable();   
-        private Text outPutValue = new Text(); 
 		
+		private HashMap<String,String> cusInfo = new HashMap<String,String>();
+        private IntWritable outPutKey = new IntWritable(); 
+        private Text outPutValue = new Text(); 
+
+        //@Override
 		protected void setup(Context context) throws IOException{
 			Path[] cachePaths = DistributedCache.getLocalCacheFiles(context.getConfiguration());
 			for(Path p:cachePaths){
@@ -46,69 +40,68 @@ public class Q3 extends Configured implements Tool{
 					BufferedReader br = new BufferedReader(new FileReader(p.toString())); 
 					while(br.readLine() != null){
 						String[] str = br.readLine().split(",",5);
-						cusInfo.put(str[0], str[1]+","+str[4]);
+						cusInfo.put(str[0], str[3]); 
 					}
 				}
 			}	
 		}
 	
 		public void map(LongWritable key, Text value,Context context) throws IOException, InterruptedException{
-			
 			String line = value.toString();
-			String []lineSplit = line.split(",", 5);
-			String info = cusInfo.get(lineSplit[1]);
-			if(info != null){
-				outPutKey.set(Integer.parseInt(lineSplit[1]));
-				outPutValue.set(info + ","+ lineSplit[2]+","+lineSplit[3]);
+			String[] lineSplit = line.split(",", 5);
+			String cc = cusInfo.get(lineSplit[1]); 
+
+			if(cc != null){
+
+				outPutKey.set(Integer.parseInt(cc));
+				outPutValue.set(lineSplit[1]+","+lineSplit[2]);
 				context.write(outPutKey, outPutValue);
 			}
 
 		}
-	
 	}
 	
 	public static class Reduce extends Reducer<IntWritable, Text, IntWritable, Text>{
-		int minItem = Integer.MAX_VALUE;
-		int num = 0;
-		double sum = 0;
-		String name = null;
-		String salary = null;
-        
-        private Text outPutValue1 = new Text(); 
+		float minTT = Float.MAX_VALUE;
+		float maxTT = Float.MIN_VALUE;
+		String cid = null;
+        private Text reduceOutputValue = new Text(); 
 		
 		public void reduce(IntWritable key, Iterable<Text> values, Context context)throws IOException, InterruptedException{
-			
+			HashMap<String,Boolean> uniqueCustomers = new HashMap<String,Boolean>();
+			int num = 0;
 			Iterator<Text> value = values.iterator();
 			while(value.hasNext()){
 				String line = value.next().toString();
 				String[] joinInfo = line.split(",");
-				name = joinInfo[0];
-				salary = joinInfo[1];
-				num ++;
-				sum += Double.parseDouble(joinInfo[2]);
-				if(Integer.parseInt(joinInfo[3]) < minItem){
-					minItem = Integer.parseInt(joinInfo[3]);
+				cid = joinInfo[0];
+				Boolean tag = uniqueCustomers.containsKey(cid);
+				if(!tag) {
+					num ++;
+					uniqueCustomers.put(cid, new Boolean(true));
+				}				
+				if(Float.parseFloat(joinInfo[1]) < minTT){
+					minTT = Float.parseFloat(joinInfo[1]);
+				}
+				if(Float.parseFloat(joinInfo[1]) > maxTT){
+					maxTT = Float.parseFloat(joinInfo[1]);
 				}
 			}
-
-	    	String sum_format = new BigDecimal(Double.toString(Math.round(sum*100.0)/100.0)).toPlainString();
-			String outTrans = name + " " + salary + " " + Integer.toString(num)+ " " +sum_format +" "+Integer.toString(minItem);
-			
-			outPutValue1.set(outTrans);
-			
-			context.write(key, outPutValue1);
-
+	    	String minTT_format = new BigDecimal(Float.toString(minTT)).toPlainString();
+	    	String maxTT_format = new BigDecimal(Float.toString(maxTT)).toPlainString();
+	    	String outTrans = Integer.toString(num)+ "," + minTT_format + "," + maxTT_format;
+			reduceOutputValue.set(outTrans);
+			context.write(key, reduceOutputValue);
 		}
 	}
 	
 	public int run(String[] args) throws Exception {
-		
 		Job job = new Job();
-		Configuration conf = job.getConfiguration(); 
+		Configuration conf = job.getConfiguration();   
 		DistributedCache.addCacheFile(new Path(args[0]).toUri(), conf);  
 	   
-	    job.setJobName("Query3");
-	    job.setJarByClass(Q3.class);
+	    job.setJobName("Q3_4");
+	    job.setJarByClass(Q3_4.class);
 			
 		     
 	    job.setMapOutputKeyClass(IntWritable.class);
@@ -129,10 +122,11 @@ public class Q3 extends Configured implements Tool{
 	    return job.isSuccessful()?0:1;
 		
 	}
-	
-	public static void main(String[] args) throws Exception {
-		int returnCode =  ToolRunner.run(new Q3(),args); 
 
+	public static void main(String[] args) throws Exception {
+		int returnCode =  ToolRunner.run(new Q3_4(),args); 
 	}
 
 }
+
+

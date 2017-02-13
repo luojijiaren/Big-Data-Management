@@ -9,21 +9,21 @@ import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.mapred.lib.*;
 import org.apache.hadoop.util.*;
 
-public class Q3_3 extends Configured implements Tool{
+public class Q3_3 extends Configured implements Tool {
 	public static class Map extends Mapper<LongWritable, Text, IntWritable, Text>{
 		 
-		private HashMap<String,String> cusInfo = new HashMap<String,String>();
+		private HashMap<String,String> cust = new HashMap<String,String>();
         private IntWritable outPutKey = new IntWritable();   
         private Text outPutValue = new Text(); 
 		
 		protected void setup(Context context) throws IOException{
 			Path[] cachePaths = DistributedCache.getLocalCacheFiles(context.getConfiguration());
 			for(Path p:cachePaths){
-				if(p.toString().endsWith("customers.txt")){
+				if(p.toString().endsWith("customers.xls")){
 					BufferedReader br = new BufferedReader(new FileReader(p.toString())); 
 					while(br.readLine() != null){
 						String[] str = br.readLine().split(",",5);
-						cusInfo.put(str[0], str[1]+","+str[4]);
+						cust.put(str[0], str[1]+","+str[4]);
 					}
 				}
 			}	
@@ -68,12 +68,14 @@ public class Q3_3 extends Configured implements Tool{
 				}
 			}
 
-	    	String sum_format = new BigDecimal(Double.toString(Math.round(sum*100.0)/100.0)).toPlainString();
-			String outTrans = name + " " + salary + " " + Integer.toString(num)+ " " +sum_format +" "+Integer.toString(minItem);
+			String transSum = Double.toString(sum);
+			String transNum = Long.toString(num);
+			String Item_min = Long.toString(minItem);			
+			String outTr = name + " " + salary + " " + transNum+ " " +transSum +" "+Item_min;
 			
-			outPutValue1.set(outTrans);
-			
-			context.write(key, outPutValue1);
+			Text output = new Text();
+			res.output(outTr);			
+			context.write(key, outPut);
 
 		}
 	}
@@ -84,8 +86,8 @@ public class Q3_3 extends Configured implements Tool{
 		Configuration conf = job.getConfiguration(); 
 		DistributedCache.addCacheFile(new Path(args[0]).toUri(), conf);  
 	   
-	    job.setJobName("Query3");
-	    job.setJarByClass(Q3.class);
+	    job.setJobName("Q3_3");
+	    job.setJarByClass(Q3_3.class);
 			
 		     
 	    job.setMapOutputKeyClass(IntWritable.class);
@@ -108,7 +110,7 @@ public class Q3_3 extends Configured implements Tool{
 	}
 	
 	public static void main(String[] args) throws Exception {
-		int returnCode =  ToolRunner.run(new Q3(),args); 
+		int returnCode =  ToolRunner.run(new Q3_3(),args); 
 
 	}
 
