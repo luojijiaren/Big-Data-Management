@@ -51,7 +51,7 @@ public class Q3_2 {
 			String s3 = Float.toString(sum);
 			String c = Long.toString(count);
 			Text result = new Text();
-			result.set(s3 + "    " + c);
+			result.set(c + "    " + s3);
 			output.collect(key, result);
 			}
 	}

@@ -26,7 +26,7 @@ public class Q3_1 {
 
       if (code>=2 && code<=6) {   
         custID.set(record[0]);
-        outString.set(record[1]+","+record[2]+","+record[3]+","+record[4]);
+        outString.set(record[1]+"   "+record[2]+"   "+record[3]+"   "+record[4]);
         output.collect(custID, outString);
       }
     }

@@ -35,15 +35,15 @@ public class Q3_1 {
 
   public static void main(String[] args) throws Exception {
 	JobConf conf = new JobConf(Q3_1.class);
- 	job.setJobName("Q3_1");
-    job.setMapperClass(TokenizerMapper.class);
+ 	conf.setJobName("Q3_1");
+    conf.setMapperClass(TokenizerMapper.class);
 
-    job.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(Text.class);
 
-    job.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(Text.class);
 
-    job.setInputFormat(TextInputFormat.class);
-    job.setOutputFormat(TextOutputFormat.class);
+    conf.setInputFormat(TextInputFormat.class);
+    conf.setOutputFormat(TextOutputFormat.class);
 
     FileInputFormat.addInputPath(conf, new Path(args[0]));
     FileOutputFormat.setOutputPath(conf, new Path(args[1]));

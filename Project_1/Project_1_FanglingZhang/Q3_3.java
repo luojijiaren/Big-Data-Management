@@ -31,12 +31,12 @@ public class Q3_3 extends Configured implements Tool {
 	public static class Map extends Mapper<LongWritable, Text, IntWritable, Text>{
 		 
 		private HashMap<String,String> cust = new HashMap<String,String>();
-        private IntWritable outPutKey = new IntWritable();   
-        private Text outPutValue = new Text(); 
+		private IntWritable outKey = new IntWritable();   
+        private Text outValue = new Text(); 
 		
 		protected void setup(Context context) throws IOException{
-			Path[] cachePaths = DistributedCache.getLocalCacheFiles(context.getConfiguration());
-			for(Path p:cachePaths){
+			Path[] cacheP = DistributedCache.getLocalCacheFiles(context.getConfiguration());
+			for(Path p:cacheP){
 				if(p.toString().endsWith("customers")){
 					BufferedReader br = new BufferedReader(new FileReader(p.toString())); 
 					while(br.readLine() != null){
@@ -49,15 +49,16 @@ public class Q3_3 extends Configured implements Tool {
 
 
 	
-		public void map(LongWritable key, Text value,Context context) throws IOException, InterruptedException{
+		public void map(LongWritable key, Text value,Context c2) throws IOException, InterruptedException{
 			
-			String line = value.toString();
-			String []lineSplit = line.split(",", 5);
-			String info = cust.get(lineSplit[1]);
+			String v = value.toString();
+			String[] vs = v.split(",", 5);
+			String info = cust.get(vs[1]);
+
 			if(info != null){
-				outPutKey.set(Integer.parseInt(lineSplit[1]));
-				outPutValue.set(info + ","+ lineSplit[2]+","+lineSplit[3]);
-				context.write(outPutKey, outPutValue);
+				outKey.set(Integer.parseInt(vs[1]));
+				outValue.set(info + ","+ vs[2]+","+vs[3]);
+				c2.write(outKey, outValue);
 			}
 
 		}
@@ -65,47 +66,89 @@ public class Q3_3 extends Configured implements Tool {
 	}
 	
 	public static class Reduce extends Reducer<IntWritable, Text, IntWritable, Text>{
-		int minItem = Integer.MAX_VALUE;
-		int num = 0;
-		double sum = 0;
-		String name = null;
-		String salary = null;
-        
-        private Text outPutValue1 = new Text(); 
-		
+		private Text result = new Text();
 		public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
+/*			int min = Integer.MAX_VALUE;
+		    int num = 0;
+		    double sum = 0;
+		    String name = null;
+		    String salary = null;
+
+
+
 			
 			Iterator<Text> value = values.iterator();
 			while(value.hasNext()){
-				String line = value.next().toString();
-				String[] joinInfo = line.split(",");
-				name = joinInfo[0];
-				salary = joinInfo[1];
+				String va = value.next().toString();
+				String[] vas = va.split(",");
+				name = vas[0];
+				salary = vas[1];
 				num ++;
-				sum += Double.parseDouble(joinInfo[2]);
-				if(Integer.parseInt(joinInfo[3]) < minItem){
-					minItem = Integer.parseInt(joinInfo[3]);
+				sum += Double.parseDouble(vas[2]);
+				if(Integer.parseInt(vas[3]) < min){
+					min = Integer.parseInt(vas[3]);
 				}
 			}
 
 			String transSum = Double.toString(sum);
 			String transNum = Long.toString(num);
-			String Item_min = Long.toString(minItem);			
-			String outTr = name + " " + salary + " " + transNum+ " " +transSum +" "+Item_min;
+			String Item_min = Long.toString(min);			
+			String outTr = name + "  " + salary + "  " + transNum+ "  " +transSum +"  "+Item_min;
 			
 			Text out = new Text();
 			out.set(outTr);			
 			context.write(key, out);
+*/
 
+      String name ="";
+      String Salary="";
+      float transTotal = 0;
+      int numTrans = 0;
+      int minItems = 10;//max is 10
+    //  for (IntWritable val : values) {
+      //  sum += val.get();
+      //}
+
+      for(Text val : values)
+      {		
+	String[] tokens = val.toString().split(",");
+	if(tokens.length ==3)//transactions
+	{
+  	    transTotal = transTotal+ Float.parseFloat(tokens[1]);
+	    numTrans = numTrans+ Integer.parseInt(tokens[0]);
+	    minItems = Math.min(minItems, Integer.parseInt(tokens[2]));
+	}
+	else if (tokens.length==2){//customers
+	    if(name.equals(""))
+		name = tokens[0];
+	    if(Salary.equals(""))
+		Salary = tokens[1];
+	}
+	else{//transactions+customers
+	    if(name.equals(""))
+		name = tokens[0];
+	    if(Salary.equals(""))
+		Salary = tokens[1];
+            transTotal = transTotal+ Float.parseFloat(tokens[3]);
+	    numTrans = numTrans+ Integer.parseInt(tokens[2]);
+	    minItems = Math.min(minItems, Integer.parseInt(tokens[4]));
+	}
+
+      }
+      String res = name+","+Salary+","+Integer.toString(numTrans)+","+Float.toString(transTotal)+","+Integer.toString(minItems);
+      result.set(res);
+      context.write(key, result);
+  
 		}
 	}
 	
 	 public int run(String[] args) throws Exception {
-		
-		
-		Configuration conf = new Configuration();
-		Job job = new Job(conf,"Q3_3");
+
+		Job job = new Job();
+		Configuration conf = job.getConfiguration();   
 		DistributedCache.addCacheFile(new Path(args[0]).toUri(), conf);  
+	   
+	    job.setJobName("Q3_3");
 	    job.setJarByClass(Q3_3.class);
 			
 		     

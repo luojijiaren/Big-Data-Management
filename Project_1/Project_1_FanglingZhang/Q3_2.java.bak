@@ -13,22 +13,23 @@ import org.apache.hadoop.util.*;
 public class Q3_2 {
 	public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text> {
 		private Text cid = new Text();
-		private Text tranSum = new Text();
+		private Text trSum = new Text();
+
 		public void map(LongWritable key, Text value,OutputCollector<Text, Text> output, 
 				Reporter reporter) throws IOException {
-          StringTokenizer itr = new StringTokenizer(value.toString());
-          while (itr.hasMoreTokens()) {
-      	  String[] tokens =itr.nextToken().split(",");
+
+          StringTokenizer tr = new StringTokenizer(value.toString());
+
+          while (tr.hasMoreTokens()) {
+      	  String[] tokens =tr.nextToken().split(",");
      	  if(tokens.length != 5)
 		  return;
 	
-	      String result = tokens[1];
-	      String val = tokens[2];
-
-	      tranSum.set(val);
-
-          cid.set(result);
-          output.collect(cid, tranSum);
+	      String t1 = tokens[1];
+	      String t2 = tokens[2];
+          cid.set(t1);
+	      trSum.set(t2);
+          output.collect(cid, trSum);
 		  }
 	   }
 	}
@@ -41,17 +42,17 @@ public class Q3_2 {
      		long count = 0;
 			float sum = 0.00000f;
 			while (values.hasNext()) {
-				String[] s = values.next().toString().split(" ");
-				float t = Float.parseFloat(s[0]);
-				sum += t;
+				String[] s1 = values.next().toString().split(" ");
+				float s2 = Float.parseFloat(s1[0]);
+				sum += s2;
 				count += 1;
 			}
 			
-			String l1 = Float.toString(sum);
-			String l2 = Long.toString(count);
-			Text res = new Text();
-			res.set(l1 + "    " + l2);
-			output.collect(key, res);
+			String s3 = Float.toString(sum);
+			String c = Long.toString(count);
+			Text result = new Text();
+			result.set(s3 + "    " + c);
+			output.collect(key, result);
 			}
 	}
 
