@@ -36,7 +36,7 @@ public class Q3_4 extends Configured implements Tool{
 		protected void setup(Context context) throws IOException{
 			Path[] cachePaths = DistributedCache.getLocalCacheFiles(context.getConfiguration());
 			for(Path p:cachePaths){
-				if(p.toString().endsWith("customers.txt")){
+				if(p.toString().endsWith("customers")){
 					BufferedReader br = new BufferedReader(new FileReader(p.toString())); 
 					while(br.readLine() != null){
 						String[] str = br.readLine().split(",",5);

@@ -11,40 +11,48 @@ import org.apache.hadoop.util.*;
 
 
 public class Q3_2 {
-	public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, DoubleWritable> {
-		private IntWritable cid = new IntWritable();
-		private DoubleWritable tranSum = new DoubleWritable();
-		public void map(LongWritable key, Text value,OutputCollector<IntWritable, DoubleWritable> output, 
-				Reporter reporter) throws IOException {
-			String line = value.toString();
-			String[] record = line.split(",");
-			int custId = Integer.parseInt(record[1]);
-			double transTotal = Double.parseDouble(record[2]);
+	public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text> {
+		private Text cid = new Text();
+		private Text trSum = new Text();
 
-			cid = new IntWritable(custId);
-			tranSum = new DoubleWritable(transTotal);
-			output.collect(cid, tranSum);
-		}
+		public void map(LongWritable key, Text value,OutputCollector<Text, Text> output, 
+				Reporter reporter) throws IOException {
+
+          StringTokenizer tr = new StringTokenizer(value.toString());
+
+          while (tr.hasMoreTokens()) {
+      	  String[] tokens =tr.nextToken().split(",");
+     	  if(tokens.length != 5)
+		  return;
+	
+	      String t1 = tokens[1];
+	      String t2 = tokens[2];
+          cid.set(t1);
+	      trSum.set(t2);
+          output.collect(cid, trSum);
+		  }
+	   }
 	}
 
-	public static class Reduce extends MapReduceBase implements Reducer<IntWritable, DoubleWritable, IntWritable, Text> {
-		private Text tranInfo = new Text();
+	public static class Reduce extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
 		
-		public void reduce(IntWritable key, Iterator<DoubleWritable> values,OutputCollector<IntWritable, Text> output, 
+		public void reduce(Text key, Iterator<Text> values,OutputCollector<Text, Text> output, 
 				Reporter reporter)throws IOException {
 
-				int transNum = 0;
-				double transSum = 0;
-
-				while (values.hasNext()) {
-					transNum += 1;
-					transSum += values.next().get();
-				}
-			    String num = Integer.toString(transNum);
-			    String sum = Double.toString(transSum);
-			    Text trans = new Text();
-			    trans.set(num + "," + sum);
-				output.collect(key, trans);
+     		long count = 0;
+			float sum = 0.00000f;
+			while (values.hasNext()) {
+				String[] s1 = values.next().toString().split(" ");
+				float s2 = Float.parseFloat(s1[0]);
+				sum += s2;
+				count += 1;
+			}
+			
+			String s3 = Float.toString(sum);
+			String c = Long.toString(count);
+			Text result = new Text();
+			result.set(s3 + "    " + c);
+			output.collect(key, result);
 			}
 	}
 
@@ -54,10 +62,10 @@ public class Q3_2 {
 	     JobConf conf = new JobConf(Q3_2.class);
 	     conf.setJobName("Q3_2");
 	     
-	     conf.setMapOutputKeyClass(IntWritable.class);
-	     conf.setMapOutputValueClass(DoubleWritable.class);
+	     conf.setMapOutputKeyClass(Text.class);
+	     conf.setMapOutputValueClass(Text.class);
 	     
-	     conf.setOutputKeyClass(IntWritable.class);
+	     conf.setOutputKeyClass(Text.class);
 	     conf.setOutputValueClass(Text.class);
 	
 	     conf.setMapperClass(Map.class);
@@ -67,7 +75,7 @@ public class Q3_2 {
 	     conf.setInputFormat(TextInputFormat.class);
 	     conf.setOutputFormat(TextOutputFormat.class);
 	
-	     FileInputFormat.setInputPaths(conf, new Path(args[0]));
+	     FileInputFormat.addInputPath(conf, new Path(args[0]));
 	     FileOutputFormat.setOutputPath(conf, new Path(args[1]));
 	
 	     JobClient.runJob(conf);
