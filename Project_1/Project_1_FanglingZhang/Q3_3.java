@@ -1,37 +1,34 @@
 package Q3_3;
 
 
-import java.util.*;
-import org.apache.hadoop.fs.Path;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.conf.*;
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.*;
-import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.mapreduce.Mapper.Context;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.util.*;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.OutputFormat;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.lang.Math;
-import java.lang.Object;
-
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
 
 
 public class Q3_3 extends Configured implements Tool {
-	public static class Map{
+	public static class Map extends Mapper<LongWritable, Text, IntWritable, Text>{
 		 
 		private HashMap<String,String> cust = new HashMap<String,String>();
         private IntWritable outPutKey = new IntWritable();   
@@ -52,8 +49,7 @@ public class Q3_3 extends Configured implements Tool {
 
 
 	
-		public void map(LongWritable key, Text value,OutputCollector<IntWritable, Text> output, 
-				Reporter reporter) throws IOException, InterruptedException{
+		public void map(LongWritable key, Text value,Context context) throws IOException, InterruptedException{
 			
 			String line = value.toString();
 			String []lineSplit = line.split(",", 5);
@@ -61,14 +57,14 @@ public class Q3_3 extends Configured implements Tool {
 			if(info != null){
 				outPutKey.set(Integer.parseInt(lineSplit[1]));
 				outPutValue.set(info + ","+ lineSplit[2]+","+lineSplit[3]);
-				output.collect(outPutKey, outPutValue);
+				context.write(outPutKey, outPutValue);
 			}
 
 		}
 	
 	}
 	
-	public static class Reduce{
+	public static class Reduce extends Reducer<IntWritable, Text, IntWritable, Text>{
 		int minItem = Integer.MAX_VALUE;
 		int num = 0;
 		double sum = 0;
@@ -77,8 +73,7 @@ public class Q3_3 extends Configured implements Tool {
         
         private Text outPutValue1 = new Text(); 
 		
-		public void reduce(IntWritable key, Iterable<Text> values, OutputCollector<IntWritable, Text> output, 
-				Reporter reporter)throws IOException, InterruptedException{
+		public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
 			
 			Iterator<Text> value = values.iterator();
 			while(value.hasNext()){
@@ -100,7 +95,7 @@ public class Q3_3 extends Configured implements Tool {
 			
 			Text out = new Text();
 			out.set(outTr);			
-			output.collect(key, out);
+			context.write(key, out);
 
 		}
 	}
@@ -120,12 +115,14 @@ public class Q3_3 extends Configured implements Tool {
 	    job.setOutputKeyClass(IntWritable.class);
 	    job.setOutputValueClass(Text.class);
 
+	    job.setMapperClass(Map.class);
+	    job.setReducerClass(Reduce.class);
 	     
         job.setInputFormatClass(TextInputFormat.class);   
         job.setOutputFormatClass(TextOutputFormat.class);
 
-	    FileInputFormat.addInputPath(job, new Path(args[0]));
-	    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+	    FileInputFormat.addInputPath(job, new Path(args[1]));
+	    FileOutputFormat.setOutputPath(job, new Path(args[2]));
         //System.exit(job.waitForCompletion(true) ? 0 : 1);
 		
     	job.waitForCompletion(true);
