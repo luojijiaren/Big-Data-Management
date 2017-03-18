@@ -68,7 +68,7 @@ public class Q3_3 extends Configured implements Tool {
 	public static class Reduce extends Reducer<IntWritable, Text, IntWritable, Text>{
 		private Text result = new Text();
 		public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
-/*			int min = Integer.MAX_VALUE;
+			int min = Integer.MAX_VALUE;
 		    int num = 0;
 		    double sum = 0;
 		    String name = null;
@@ -98,47 +98,8 @@ public class Q3_3 extends Configured implements Tool {
 			Text out = new Text();
 			out.set(outTr);			
 			context.write(key, out);
-*/
 
-      String name ="";
-      String Salary="";
-      float transTotal = 0;
-      int numTrans = 0;
-      int minItems = 10;//max is 10
-    //  for (IntWritable val : values) {
-      //  sum += val.get();
-      //}
 
-      for(Text val : values)
-      {		
-	String[] tokens = val.toString().split(",");
-	if(tokens.length ==3)//transactions
-	{
-  	    transTotal = transTotal+ Float.parseFloat(tokens[1]);
-	    numTrans = numTrans+ Integer.parseInt(tokens[0]);
-	    minItems = Math.min(minItems, Integer.parseInt(tokens[2]));
-	}
-	else if (tokens.length==2){//customers
-	    if(name.equals(""))
-		name = tokens[0];
-	    if(Salary.equals(""))
-		Salary = tokens[1];
-	}
-	else{//transactions+customers
-	    if(name.equals(""))
-		name = tokens[0];
-	    if(Salary.equals(""))
-		Salary = tokens[1];
-            transTotal = transTotal+ Float.parseFloat(tokens[3]);
-	    numTrans = numTrans+ Integer.parseInt(tokens[2]);
-	    minItems = Math.min(minItems, Integer.parseInt(tokens[4]));
-	}
-
-      }
-      String res = name+","+Salary+","+Integer.toString(numTrans)+","+Float.toString(transTotal)+","+Integer.toString(minItems);
-      result.set(res);
-      context.write(key, result);
-  
 		}
 	}
 	
@@ -159,7 +120,7 @@ public class Q3_3 extends Configured implements Tool {
 	    job.setOutputValueClass(Text.class);
 
 	    job.setMapperClass(Map.class);
-	    //job.setReducerClass(Reduce.class);
+	    job.setReducerClass(Reduce.class);
 	     
         job.setInputFormatClass(TextInputFormat.class);   
         job.setOutputFormatClass(TextOutputFormat.class);

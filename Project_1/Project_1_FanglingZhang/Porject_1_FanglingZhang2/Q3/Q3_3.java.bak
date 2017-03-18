@@ -68,7 +68,7 @@ public class Q3_3 extends Configured implements Tool {
 	public static class Reduce extends Reducer<IntWritable, Text, IntWritable, Text>{
 		private Text result = new Text();
 		public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
-/*			int min = Integer.MAX_VALUE;
+			int min = Integer.MAX_VALUE;
 		    int num = 0;
 		    double sum = 0;
 		    String name = null;
@@ -98,9 +98,9 @@ public class Q3_3 extends Configured implements Tool {
 			Text out = new Text();
 			out.set(outTr);			
 			context.write(key, out);
-*/
 
-      String name ="";
+
+ /*     String name ="";
       String Salary="";
       float transTotal = 0;
       int numTrans = 0;
@@ -137,7 +137,8 @@ public class Q3_3 extends Configured implements Tool {
       }
       String res = name+","+Salary+","+Integer.toString(numTrans)+","+Float.toString(transTotal)+","+Integer.toString(minItems);
       result.set(res);
-      context.write(key, result);
+      context.write(key, result); 
+	  */
   
 		}
 	}
@@ -159,7 +160,7 @@ public class Q3_3 extends Configured implements Tool {
 	    job.setOutputValueClass(Text.class);
 
 	    job.setMapperClass(Map.class);
-	    //job.setReducerClass(Reduce.class);
+	    job.setReducerClass(Reduce.class);
 	     
         job.setInputFormatClass(TextInputFormat.class);   
         job.setOutputFormatClass(TextOutputFormat.class);
