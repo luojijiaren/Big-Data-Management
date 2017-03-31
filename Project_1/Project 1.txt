@@ -1,1 +1,0 @@
-For Q1, i used Apache poi in the programming. To run 'Q1_Customers.java' and 'Q1_Transactions.java', you need to download Apache poi and set environment correctly.
